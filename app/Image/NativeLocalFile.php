@@ -36,7 +36,7 @@ class NativeLocalFile extends MediaFile
 			if (is_resource($this->stream)) {
 				\Safe\rewind($this->stream);
 			} else {
-				$this->stream = \Safe\fopen($this->getAbsolutePath(), 'r+b');
+				$this->stream = \Safe\fopen($this->getAbsolutePath(), 'rb');
 			}
 
 			return $this->stream;
@@ -94,6 +94,9 @@ class NativeLocalFile extends MediaFile
 			$this->close();
 			// `is_file` returns false for links, so we must check separately with `is_link`
 			if (is_link($this->path) || is_file($this->path)) {
+				if (!is_writable($this->path)) {
+					throw new MediaFileOperationException('deletion not permitted: ' . $this->path);
+				}
 				\Safe\unlink($this->path);
 			}
 		} catch (\ErrorException $e) {
